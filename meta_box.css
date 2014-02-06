@@ -1,0 +1,6 @@
+/**ADMIN STYLES**/
+div.meta-box-wrapper div { margin-bottom: 10px; }
+div.meta-box-wrapper div label { width: 160px; float: left; line-height: 23px; }
+div.meta-box-wrapper div label.help-inline { float: none; }
+div.meta-box-wrapper div input[type="text"], div.meta-box-wrapper div input[type="password"], 
+div.meta-box-wrapper div textarea, div.meta-box-wrapper div select { width: 300px; }
