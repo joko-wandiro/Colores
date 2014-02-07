@@ -36,18 +36,28 @@ function phantasmacode_insert_article() {
 //	echo "</pre>";
 }
 
+add_action('wp', 'theme_enqueue_scripts_404');
+function theme_enqueue_scripts_404() {
+	if( is_404() ){
+		wp_enqueue_style('page_not_found_css', CSS_PATH.'page-not-found.css', FALSE);
+	}
+}
+
 add_action("init", "theme_enqueue_scripts");
 function theme_enqueue_scripts(){
 	global $pagenow, $wp_scripts;
+	
 	if( ! is_admin() && ! in_array($pagenow, array('wp-login.php', 'wp-register.php')) ){ // FrontEnd Site
 		// Add Javascript Files
 		wp_enqueue_script('jquery');
 		wp_enqueue_script('bootstrap_js', JS_PATH. 'bootstrap.min.js');
-		wp_enqueue_script('bootstrap_collapse', JS_PATH. 'bootstrap-collapse.js');
 		wp_enqueue_script('main_js', JS_PATH. 'main.js');
 
 		// Add Stylesheet Files
-		wp_enqueue_style('main_css', TEMP_URL.'style.css', FALSE);
+//		contact-form-7-css
+//		wp_enqueue_style('style_css', TEMP_URL.'style.css', FALSE);
+		wp_enqueue_style('style_css', TEMP_URL.'style.css', array('contact-form-7', 'wc-shortcodes-style'));
+//		wp_enqueue_style('main_css', CSS_PATH.'main.css', '', '', FALSE);
 		wp_enqueue_style('font_css', 'http://fonts.googleapis.com/css?family=Duru+Sans', FALSE);
 	}
 }
@@ -433,7 +443,6 @@ if (class_exists('MultiPostThumbnails')) {
 	);
 }
 
-require_once('stuff-post-type.php');
 require_once('pages/theme-options.php');
 
 // Support Shortcode on Widget Text
@@ -488,5 +497,38 @@ function phc_wp_widget_calendar_do($atts, $content=null){
 	$default= array('id'=>"", 'type'=>"post");
 	extract(shortcode_atts($default, $atts));
 	return the_widget( 'WP_Widget_Calendar' );
+}
+
+function buffer_output($function_name=""){
+ob_start();
+$function_name();
+$res = ob_get_contents();
+ob_end_clean();
+
+return $res;
+}
+
+
+//add_filter( 'wpcf7_form_elements', 'wpcf7_form_elements' );
+function wpcf7_form_elements($form_do_shortcode){
+//	$patterns = array ('/\<p\>\<\/p\>/');
+	$patterns = array('/<p><\/p>/');
+	$replace = array('');
+	$form_do_shortcode= preg_replace($patterns, $replace, $form_do_shortcode);
+
+//	echo "<pre>";
+//	print_r($form_do_shortcode);
+//	echo "</pre>";
+//	return $class . " form-horizontal";
+}
+
+add_filter( 'wpcf7_form_class_attr', 'wpcf7_form_class_attr' );
+function wpcf7_form_class_attr($class){
+	return $class . " form-horizontal";
+}
+
+//add_action('wpcf7_post_edit_form_tag', 'wpcf7_post_edit_form_tag');
+function wpcf7_post_edit_form_tag(){
+	echo " class=\"form-horizontal\"";
 }
 ?>

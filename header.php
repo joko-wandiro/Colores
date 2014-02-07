@@ -47,7 +47,7 @@ if ( $paged >= 2 || $page >= 2 )
 		<div class="span3">
 		<div id="logo">
 		<a class="logo" href="<?php echo get_home_url(); ?>" 
-		title="<?php echo __('Phantasmacode'); ?>">&nbsp;</a>
+		title="<?php echo __('Phantasmacode', PHANTASMACODE_THEME); ?>">&nbsp;</a>
 		</div>
 		</div>
 		<div class="span9">

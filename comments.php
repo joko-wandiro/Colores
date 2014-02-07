@@ -45,6 +45,7 @@ if ( post_password_required() )
 	
 	$args = array(
 	'id_form'=>'commentform',
+	'class_submit'=>'btn',
 	'id_submit'=>'submit',
 	'title_reply'=>__('Leave a Comment'),
 	'title_reply_to'=>__('Leave a Reply to %s'),

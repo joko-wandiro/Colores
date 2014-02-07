@@ -22,22 +22,30 @@
 			?>
 				<div class="post">
 				<h2 class="title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
-				<?php
-				$post_by= __("by %s on %s in %s with ", PHANTASMACODE_THEME);
-				$categories= get_the_category($post->ID);
-				$category= $categories[0];
-				$category->link = get_category_link($category->cat_ID);
+				<?php 
+				$categories_list= "";
+				if ( is_object_in_taxonomy( get_post_type(), 'category' ) ){ // Hide category text when not supported 
+					/* translators: used between list items, there is a space after the comma */
+					$categories_list = get_the_category_list( __( ', ', PHANTASMACODE_THEME) );
+					if ( $categories_list ){
+						$categories_list= sprintf ( __( 'in %s', PHANTASMACODE_THEME), $categories_list );
+					}
+				} // End if is_object_in_taxonomy( get_post_type(), 'category' ) 
 				?>
 				<p class="post-by">
-				<?php 
-				_e("by ") . the_author() . _e(" on ") . the_date() . _e(" in ");
+				<?php
+				$post_by = __('by %1$s on %2$s %3$s with %4$s', PHANTASMACODE_THEME);
+				printf($post_by, get_the_author(), esc_html(get_the_date()), $categories_list, 
+				buffer_output("comments_popup_link"));
 				?>
-				<a href="<?php echo esc_url( $category->link ); ?>" 
-				title="<?php echo esc_attr( $category->cat_name ); ?>"><?php echo $category->cat_name; ?></a>
-				<?php _e(" with "); ?><a href="<?php echo esc_url( get_comment_link() ); ?>" 
-				title="<?php echo esc_attr( get_comments_number() ); ?>"><?php echo comments_popup_link(); ?></a>
 				</p>
+				<?php
+				if ( has_post_thumbnail() ) { // check if the post has a Post Thumbnail assigned to it.
+				?>
 				<div class="post-feature-image"><?php the_post_thumbnail(); ?></div>
+				<?php
+				}
+				?>
 				<div class="content"><?php the_excerpt(); ?></div>
 				<div class="read-more"><a href="<?php the_permalink(); ?>"><?php _e("Read More", 
 				PHANTASMACODE_THEME); ?></a></div>
@@ -74,7 +82,7 @@
 		<?php }
 		else{ ?>
 			<div>
-			<p><?php _e('No posts were found. Sorry!'); ?></p>
+			<p><?php _e('No posts were found. Sorry!', PHANTASMACODE_THEME); ?></p>
 			</div>
 		<?php } ?>		
 		</div>

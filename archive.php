@@ -1,12 +1,19 @@
 <?php get_header(); ?>
-<!-- Start Content -->
-<div class="container">
-<div class="row-fluid" id="archive">
-	<div class="span12">
-		<h1><?php echo ucfirst(single_cat_title('', FALSE)); ?></h1>
+
+<!-- Start Content Section -->
+<div class="container" id="content">
+	<div class="row-fluid">
+		<!-- Start SideBar -->
+		<div class="span3">
+		<?php get_sidebar(); ?>
+		</div>
+		<!-- End SideBar -->
+		<!-- Start Content - Articles -->
+		<div class="span9">
 		<?php if( have_posts() ){ ?>
-			<div class="accordion" id="accordion">
-				<div class="accordion-group">
+			<div class="wrapper-posts" id="articles">
+			<h1><?php _e("All entries in ", PHANTASMACODE_THEME); ?>
+			<span class="highlight"><?php echo ucfirst(single_cat_title('', FALSE)); ?></span></h1>
 			<?php 
 			global $wp_query;
 			$ct= 1;
@@ -15,60 +22,75 @@
 				the_post();
 				$post= get_post();
 			?>
-					<div class="accordion-heading">
-					<div class="row-fluid accordion-toggle" data-toggle="collapse" data-parent="#accordion" 
-					data-target="#collapse-<?php echo $post->post_name; ?>">
-						<div class="span3 accordion-toggle-date">
-						<?php strtoupper(the_time('d F Y')); ?>
-						</div>
-						<div class="span9 accordion-toggle-title">
-						<?php the_title(); ?>
-						</div>					
-					</div>
-					
-					</div>
-					<div id="collapse-<?php echo $post->post_name; ?>" class="accordion-body collapse">
-					<div class="accordion-inner">
-						<div class="row-fluid">
-						<div class="span2 accordion-inner-read-more">
-						<a class="btn" href="<?php the_permalink(); ?>"><?php _e("Read More"); ?></a>
-						</div>
-						<div class="span10 accordion-inner-excerpt">
-						<?php the_excerpt(); ?>
-						</div>
-						</div>
-					</div>
-					</div>
+				<div class="post">
+				<h2 class="title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
+				<?php 
+				$categories_list= "";
+				if ( is_object_in_taxonomy( get_post_type(), 'category' ) ){ // Hide category text when not supported 
+					/* translators: used between list items, there is a space after the comma */
+					$categories_list = get_the_category_list( __( ', ', PHANTASMACODE_THEME) );
+					if ( $categories_list ){
+						$categories_list= sprintf ( __( 'in %s', PHANTASMACODE_THEME), $categories_list );
+					} // End if categories 
+				} // End if is_object_in_taxonomy( get_post_type(), 'category' ) 
+				?>				
+				<p class="post-by">
+				<?php
+				$post_by = __('by %1$s on %2$s %3$s with %4$s', PHANTASMACODE_THEME);
+				printf($post_by, get_the_author(), esc_html(get_the_date()), $categories_list, 
+				buffer_output("comments_popup_link"));
+				?>
+				</p>
+				<?php
+				if ( has_post_thumbnail() ) { // check if the post has a Post Thumbnail assigned to it.
+				?>
+				<div class="post-feature-image"><?php the_post_thumbnail(); ?></div>
+				<?php
+				}
+				?>
+				<div class="content"><?php the_excerpt(); ?></div>
+				<div class="read-more"><a href="<?php the_permalink(); ?>"><?php _e("Read More", 
+				PHANTASMACODE_THEME); ?></a></div>
+				<?php
+//				echo "<pre>";
+//				print_r(comments_popup_link());
+//				echo "</pre>";
+				?>				
+				</div>
 			<?php
 				$ct++;
 			}
 			?>
+				<div id="navigation">
+				<?php
+				// Navigation Page
+				$next_posts_link_text= __("Older Entries", PHANTASMACODE_THEME);
+				$previous_posts_link_text= __("Newer Entries", PHANTASMACODE_THEME);
+				$navigations= array("next_posts_link", "previous_posts_link");
+				foreach( $navigations as $nav ){
+					$text= $nav . "_text";
+				?>
+				<div class="<?php echo str_replace("_", "-", $nav); ?>"><?php $nav($$text); ?></div>
+				<?php
+//					call_user_func($nav);
+				}
+//				echo "<pre>";
+//				var_dump(get_next_posts_link());
+//				var_dump(get_previous_posts_link());
+//				echo "</pre>";
+				?>
 				</div>
 			</div>
-			<?php
-			$big = 999999999; // need an unlikely integer
-			$args = array(
-				'base' => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
-				'format' => '?paged=%#%',
-				'current' => max(1, get_query_var('paged')),
-				'total' => $wp_query->max_num_pages,
-				'type'=>'array'
-			);
-			
-			$pagination= paginate_links($args);
-			// Create Pagination Links follow foundation structure.
-			bootstrap_pagination($pagination);
-			?>
 		<?php }
 		else{ ?>
 			<div>
-			<p><?php _e('No posts were found. Sorry!'); ?></p>
+			<p><?php _e('No posts were found. Sorry!', PHANTASMACODE_THEME); ?></p>
 			</div>
-		<?php } ?>
+		<?php } ?>		
+		</div>
+		<!-- End Content - Articles -->
 	</div>
 </div>
-</div>
-</div>
-<!-- End Content -->
+<!-- End Content Section -->
 
 <?php get_footer(); ?>

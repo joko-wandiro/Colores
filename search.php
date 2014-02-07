@@ -1,64 +1,86 @@
 <?php get_header(); ?>
 
-<!-- Start Content -->
-<div class="container">
-<div class="row-fluid">
-	<div class="span12">
-		<?php
-		global $query_string;
-
-		$query_args = explode("&", $query_string);
-		$search_query = array();
-
-		foreach($query_args as $key => $string) {
-			$query_split = explode("=", $string);
-			$search_query[$query_split[0]] = urldecode($query_split[1]);
-		}
-		$wp_query= new WP_Query($search_query);
-		?>
-		<?php if ( $wp_query->have_posts() ) : ?>
-			<div>
-			<h1 class="page-title"><?php printf( __('Search Results for: %s'), '<span>' . get_search_query() . 
-			'</span>' ); ?></h1>
-			</div>
-			<?php while ( $wp_query->have_posts() ) : $wp_query->the_post(); ?>
-			<h2 class=""><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
-			<p class="">
-			<span class="italic"><?php echo _e("Posted on"); ?></span> <a href="<?php the_permalink(); ?>">
-			<?php strtoupper(the_time('l F d, Y')); ?></a>
-			</p>
-			<div>
-			<?php the_excerpt(); ?>
-			</div>
-			<?php endwhile; ?>
-			<?php
-			$big = 999999999; // need an unlikely integer
-			$args = array(
-				'base' => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
-				'format' => '?paged=%#%',
-				'current' => max(1, get_query_var('paged')),
-				'total' => $wp_query->max_num_pages,
-				'type'=>'array'
-			);
-			
-			$pagination= paginate_links($args);
-			// Create Pagination Links follow foundation structure.
-			bootstrap_pagination($pagination);
+<!-- Start Content Section -->
+<div class="container" id="content">
+	<div class="row-fluid">
+		<!-- Start SideBar -->
+		<div class="span3">
+		<?php get_sidebar(); ?>
+		</div>
+		<!-- End SideBar -->
+		<!-- Start Content - Articles -->
+		<div class="span9">
+		<?php if( have_posts() ){ ?>
+			<div class="wrapper-posts" id="articles">
+			<h1 class="page-title"><?php printf( __('Search Results for: %s', PHANTASMACODE_THEME), 
+			'<span class="highlight">' . get_search_query() . '</span>' ); ?></h1>
+			<?php 
+			global $wp_query;
+			$ct= 1;
+			$number_of_posts= $wp_query->post_count;
+			while( have_posts() ){
+				the_post();
+				$post= get_post();
 			?>
-		<?php else : ?>
-			<h1 class="entry-title"><?php _e( 'Nothing Found'); ?></h1>
-			<div class="entry-content">
-				<p>
+				<div class="post">
+				<h2 class="title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
 				<?php 
-				_e( 'Sorry, but nothing matched your search criteria. Please try again with some different keywords.');
+				$categories_list= "";
+				if ( is_object_in_taxonomy( get_post_type(), 'category' ) ){ // Hide category text when not supported 
+					/* translators: used between list items, there is a space after the comma */
+					$categories_list = get_the_category_list( __( ', ', PHANTASMACODE_THEME) );
+					if ( $categories_list ){
+						$categories_list= sprintf ( __( 'in %s', PHANTASMACODE_THEME), $categories_list );
+					}
+				} // End if is_object_in_taxonomy( get_post_type(), 'category' ) 
+				?>				
+				<p class="post-by">
+				<?php
+				$post_by = __('by %1$s on %2$s %3$s with %4$s', PHANTASMACODE_THEME);
+				printf($post_by, get_the_author(), esc_html(get_the_date()), $categories_list, 
+				buffer_output("comments_popup_link"));
 				?>
 				</p>
-				<?php get_search_form(); ?>
-			</div><!-- .entry-content -->
-		<?php endif; ?>
+				<?php
+				if ( has_post_thumbnail() ) { // check if the post has a Post Thumbnail assigned to it.
+				?>
+				<div class="post-feature-image"><?php the_post_thumbnail(); ?></div>
+				<?php
+				}
+				?>
+				<div class="content"><?php the_excerpt(); ?></div>
+				<div class="read-more"><a href="<?php the_permalink(); ?>"><?php _e("Read More", 
+				PHANTASMACODE_THEME); ?></a></div>
+				</div>
+			<?php
+				$ct++;
+			}
+			?>
+				<div id="navigation">
+				<?php
+				// Navigation Page
+				$next_posts_link_text= __("Older Entries", PHANTASMACODE_THEME);
+				$previous_posts_link_text= __("Newer Entries", PHANTASMACODE_THEME);
+				$navigations= array("next_posts_link", "previous_posts_link");
+				foreach( $navigations as $nav ){
+					$text= $nav . "_text";
+				?>
+				<div class="<?php echo str_replace("_", "-", $nav); ?>"><?php $nav($$text); ?></div>
+				<?php
+				}
+				?>
+				</div>
+			</div>
+		<?php }
+		else{ ?>
+			<div>
+			<p><?php _e('No posts were found. Sorry!', PHANTASMACODE_THEME); ?></p>
+			</div>
+		<?php } ?>		
+		</div>
+		<!-- End Content - Articles -->
 	</div>
 </div>
-</div>
-<!-- End Content -->
+<!-- End Content Section -->
 
 <?php get_footer(); ?>
